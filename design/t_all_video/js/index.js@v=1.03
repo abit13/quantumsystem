@@ -1,0 +1,306 @@
+//аналог php функции str_replace. Заменяет search на replace в строке subject
+ function str_replace(search, replace, subject) {
+	return subject.split(search).join(replace);
+}
+//аналог php функции strstr. Ищет  needle в haystack
+function strstr( haystack, needle, bool ) {
+	var pos = 0;
+
+	pos = haystack.indexOf( needle );
+	if( pos == -1 ){
+		return false;
+	} else{
+		if( bool ){
+			return haystack.substr( 0, pos );
+		} else{
+			return haystack.slice( pos );
+		}
+	}
+}
+
+
+// Preloader 
+setTimeout (function(){
+    $('.logoPreloader').removeClass('opacity0');
+}, 500);
+setTimeout (function(){
+    $('.progress').addClass('w100');
+}, 500);
+setTimeout (function(){
+    $('#preloader').addClass('opacity0');
+}, 1500);
+setTimeout (function(){
+    $('#preloader').addClass('hidden');
+}, 4000);
+
+// Navbar
+$(window).scroll(function () {
+	if ($(this).scrollTop() > 1) {
+		$('.navbar').removeClass("navbar-static-top");
+		$('.navbar').addClass("navbar-fixed-top");
+	} else {
+		$('.navbar').addClass("navbar-static-top");
+		$('.navbar').removeClass("navbar-fixed-top");
+	}
+});
+
+
+$(document).ready(function() {
+    // РЕГИСТРИРУЕМ СОБЫТИЯ ДЛЯ ПРИЛОЖЕНИЯ
+    function onPause (evt) {	
+	console.log('pause', '1');
+        
+        $('.embedly-custom').each(function(i, val){
+            $('.embedly-custom')[i].pause(); 
+        });
+        
+        $('.embedly-embed')[0].contentWindow.postMessage('{"event":"command","func":"' + 'pauseVideo' + '","args":""}', '*'); 
+    }
+    function onResume (evt) {	
+        console.log('resume', '1');
+        //$('.embedly-embed')[0].contentWindow.postMessage('{"event":"command","func":"' + 'playVideo' + '","args":""}', '*'); 
+    }
+    function onBackKeyDown (evt) {	
+            console.log('backkeydown', '1');
+    }
+
+    function displayMessage(evt){
+        var _evt_name = evt.data.eventName;
+        if(_evt_name === 'onPause'){ 
+            onPause();
+        }
+        else if(_evt_name === 'onResume'){ 
+            onResume();
+        }
+        else if(_evt_name === 'onBackKeyDown'){ 
+            onBackKeyDown();
+        }
+    }
+    if (window.addEventListener) {
+            // For standards-compliant web browsers
+            window.addEventListener("message", displayMessage, false);
+    }
+    else {
+            window.attachEvent("onmessage", displayMessage);
+    }
+    // Регистрация событий для приложения END
+    
+    //$('.embedly-embed')[0].contentWindow.postMessage('{"event":"command","func":"' + 'seekTo' + '","seconds":"0"}', '*');
+    
+    // Обработка визуально части блока с видео в баннере
+    /*if ($('.baner iframe').length > 0) {
+        $('.baner iframe').wrap('<div class="video_holder" />');
+        $('.video_holder').append(_loader);
+    }*/
+    
+    
+   //формат полей с номером телефона
+    var countryCode = '';
+
+    function get_country_ipdata(){
+        // Set keys array
+        var arr_ip_services = [
+            '873ee2ede2a302df66231d62508b4eb4619ee9e8f2a5e64c4387072d'
+            , '40fa0f3c8d2cdcb8add68c305feff11db708360780f0066387164f0b'
+            , '2a677500e3477e6d0fea93fee0c6733539579a5de256cde17b8e1040'
+            , 'f46801585dd4b688b56b3e6caeca71244fdfc99153c8878bfa1f491f'
+            , 'f35ee19792282607ce7d3fb11bf3e9f97fb798758a39c5b01de49dac'
+            , '55f898043244f01c09a478ed124bce64fe27474f05dbca7b4a85b0a5' //info@gloryft.com
+            , 'b64db39a8154587bb440ae0a773c9df999d6ebb270a8a3c388165727' //nobody@gloryft.com
+            , '16a6528d481f7475d4affda52f72fe2e254e4f8f1e9c9ea74e49a6b0' //avocode@algofxpro.com
+            , '77e082430a7324a84430020dd411f0c60396e452e8667f85002f9798' //gegoge9967@edusamail.net
+            , '05fc683ddf3c114517db467e4e9e34c2de29e1b784de9dec27d5bf15' //glory@x3mailer.com
+            , '221539240a8dccf7c4b73cb3db26b7034bc822c05121337f671a0722' //algo@finxmail.com
+        ];
+        // get random key
+        var ip_rand = Math.floor(Math.random() * arr_ip_services.length);
+        // GET key
+        var ip_key = arr_ip_services[ip_rand];
+        console.log('ips', ip_rand);
+
+        //https://api.ipdata.co/?api-key=40fa0f3c8d2cdcb8add68c305feff11db708360780f0066387164f0b
+        $.get('https://api.ipdata.co/?api-key=' + ip_key, function () {
+        }, "jsonp")
+            .always(function (resp) {
+                country = (resp && resp.country_code) ? resp.country_code : "";
+                if(country.length == 2){
+                    countryCode = country;
+                }
+                console.log('ada', countryCode);
+            });
+    }
+
+    function get_country_cloudflare(){
+        $.ajax({
+            url: 'https://www.cloudflare.com/cdn-cgi/trace',
+            success: function(data){
+                var country = data.match(/loc=(.+)/)[1];
+                if(country.length == 2){
+                    countryCode = country;
+                }
+                console.log('clfl',countryCode);
+            }
+        });
+    }
+
+    function get_country_geoplugin(){
+        $.getJSON('http://www.geoplugin.net/json.gp', function (data) {
+            var country = data.geoplugin_countryCode;
+            if(country.length == 2){
+                countryCode = country;
+            }
+            console.log('gpl', countryCode);
+        });
+    }
+
+    var telInput = $('.phone_input');
+    telInput.intlTelInput({
+        utilsScript: '/design/plugins/intl-tel-input-12.1.0/build/js/utils.js',
+        autoPlaceholder: true,
+        initialCountry: "auto",
+        geoIpLookup: function(callback) {
+            get_country_cloudflare();
+            setTimeout(function(){
+                if (countryCode == '' || countryCode == undefined) {
+                    get_country_ipdata();
+                    setTimeout(function(){
+                        if (countryCode == '' || countryCode == undefined) {
+                            get_country_geoplugin();
+                            setTimeout(function(){
+                                callback(countryCode);
+                            }, 1000);
+                        }
+                        else{
+                            callback(countryCode);
+                        }
+                    }, 1000);
+                }
+                else{
+                    callback(countryCode);
+                }
+            }, 1000);
+        }
+    });
+
+    // on blur: validate
+    var phone_validate = function(){
+        if ($.trim(telInput.val())) {
+            //console.log('t',telInput.intlTelInput("getNumber"));
+          if (telInput.intlTelInput("isValidNumber") && telInput.intlTelInput("getNumber").length>=9) {
+            telInput.removeClass("error_input").addClass("ok_input");
+            return true;
+          } else {
+            telInput.removeClass("ok_input").addClass("error_input");
+            return false;
+          }                  
+        }
+    }
+    // on keyup / change flag: reset
+    telInput.on("keyup change countrychange", phone_validate);
+    
+    $(document).on('submit', '.ajax_form', function(){
+            var _form   = $(this);
+            var _action = _form.attr('action');
+            
+            if(!telInput.hasClass("ok_input")){
+                _form.find('.form_error').slideUp(150, function(){
+                    $(this).html('<p>'+_phone_error+'</p>').slideDown(300);
+                });
+                return false;
+            }
+
+            $(".phone").val($('.phone_input').intlTelInput("getNumber"));        
+            var countryData = $('.phone_input').intlTelInput("getSelectedCountryData");
+            $('.country_name').val(countryData.name.replace(/(.+)\s\((.+)\)/,"$1"));
+            
+            if($('.ajax_form select').is('.question_form_select')){
+                $(_form).find('.question_form_select').each(function(){
+                    if($(this).val() != "1"){
+                        $(this).addClass('error_input');
+                    }
+                    else{
+                        $(this).removeClass('error_input');
+                    }
+                });
+
+                if($('.ajax_form select').hasClass('error_input')){
+                    return false;
+                }
+            }
+            
+            _form.find('.waiting_block').html(_loader).show();
+            var formData = new FormData($(_form)[0]);
+            
+            if($('.ajax_form .sms_confirm_block').is('div')){
+                var _confirm_code = _form.find('input[name=sms_code]').val();
+                _form.find('.sms_confirm_block').remove();
+                $('.sms_confirm_block input[name=sms_code]').val(_confirm_code);
+            }
+            
+            $.ajax({
+                    url: _action,
+                    type: 'post',
+                    data: formData,
+                    async: true,
+                    cache: false,
+                    contentType: false,
+                    processData: false,
+                    dataType: 'json',
+                    success: function(data) {
+                        _form.find('.waiting_block').html('').hide();
+                        if(data.success){
+                            if(data.sms_confirm_action){
+                                $('.sms_confirm_block').clone().css('opacity','0').appendTo(_form).animate({opacity:1},500);
+                            }
+                            else{                            
+                                function getYaCounters() {
+                                    var obj = window;
+                                    var yaCounters = [];
+                                    for (var key in obj) {
+                                        if (key.indexOf("yaCounter") == 0) {
+                                            yaCounters.push(key);
+                                        }
+                                    }
+                                    return yaCounters;
+                                }
+                                var yandexCounters = getYaCounters();
+                                if(yandexCounters.length>0){
+                                    for (var i = 0; i < yandexCounters.length; i++) {
+                                        window[yandexCounters[i]].reachGoal("PODPISKA");
+                                    }
+                                }
+
+                                var _u_n = _form.find('input[name="first_name"]').val()+' '+_form.find('input[name="last_name"]').val();
+                                var _token = data.api_response.result.token;
+                                var _email = data.apiData.email;
+                                window.location.href = "/thanks?u_n="+encodeURI(_u_n)+"&e="+_email+"&t="+_token;
+                            }
+                        }
+                        else{
+                            if(data.sms_confirm_action){
+                                $('.sms_confirm_block').clone().css('opacity','0').appendTo(_form).animate({opacity:1},500);
+                                _form.find('.sms_confirm_block .form_error').html(data.errors).slideDown(300);
+                            }
+                            else{                            
+                                _form.find('.form_error').slideUp(150, function(){
+                                    $(this).html(data.errors).slideDown(300);
+                                    if($('.sms_confirm_block').is('div')){
+                                        $('.sms_confirm_block input[name=sms_code]').val('');
+                                    }
+                                });
+                            }
+                        }
+                        console.log('data_success', data);
+                    },
+                    error: function(data){
+                        _form.find('.waiting_block').html('').hide();
+                        _form.find('.form_error').slideUp(150, function(){
+                            $(this).html('Не удалось отправить форму. Свяжитесь с администратором сайта.').slideDown(300);
+                        });
+                        console.log('data_error', data);
+                    }
+            });
+           return false;
+        });
+    
+});
